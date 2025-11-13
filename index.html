@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>2-Player Mirror Game</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #fafafa;
+    }
+    #choose {
+      margin-bottom: 20px;
+    }
+    #rect {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      background-color: grey;
+      cursor: pointer;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      transition: background-color 0.3s ease;
+    }
+    h2 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>2-Player Mirror Game</h2>
+  <p id="playerLabel">Connecting...</p>
+
+  <div id="choose">
+    <p>Choose your starting color:</p>
+    <button onclick="choose('red')">Red</button>
+    <button onclick="choose('blue')">Blue</button>
+  </div>
+
+  <div id="rect"></div>
+
+  <script>
+    const socket = io();
+    const rect = document.getElementById("rect");
+    const chooseDiv = document.getElementById("choose");
+    const playerLabel = document.getElementById("playerLabel");
+
+    let playerNumber = 0;
+
+    // Choose initial color
+    function choose(color) {
+      socket.emit("chooseColor", color);
+      chooseDiv.style.display = "none";
+    }
+
+    // Toggle color on click
+    rect.addEventListener("click", () => {
+      socket.emit("toggleColor");
+    });
+
+    // Update rectangle color
+    socket.on("updateColor", color => {
+      if (color) {
+        rect.style.backgroundColor = color;
+        chooseDiv.style.display = "none";
+      } else {
+        rect.style.backgroundColor = "grey";
+        chooseDiv.style.display = "block";
+      }
+    });
+
+    // Set player number label
+    socket.on("playerNumber", number => {
+      playerNumber = number;
+      playerLabel.innerText = `You are Player ${playerNumber}`;
+    });
+  </script>
+</body>
+</html>
